@@ -1,0 +1,86 @@
+/* common setting */
+@import 'common';
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'San Francisco', Helvetica;
+}
+
+.link {
+    cursor: pointer;
+}
+
+/*
+@font-size: 14;
+@em: @font-size * 1em;
+
+@media screen {
+    body {
+        font-size: @font-size / @em;
+    }
+}
+@media screen and (min-width: 768px) {
+    body {
+        font-size: (@font-size + 2) / @em;
+    }
+}
+@media screen and (min-width: 992px) {
+    body {
+        font-size: (@font-size + 3) / @em;
+    }
+}
+@media screen and (min-width: 1200px) {
+    body {
+        font-size: (@font-size + 4) / @em;
+    }
+}
+*/
+
+/* main */
+.loading {
+    font-size: @super;
+    width: 100%;
+    text-align: center;
+    vertical-align: middle;
+    position: absolute;
+    top: 50%;
+    left: 0;
+}
+.info {
+    .title {
+        font-size: @large;
+        text-align: center;
+    }
+    .selected {
+        cursor: default !important;
+        font-style: italic;
+        color: @grey;
+    }
+    .selected:hover, .selected:active {
+        background-color: #fff !important;
+        color: @grey;
+    };
+}
+/*.map-control {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #999;
+    font-size: @large;
+}*/
+/* bootstrap tweek */
+.container {
+    width: 100% !important;
+}
+.nav, .pagination, .carousel, .panel-title, .btn-group a { cursor: pointer; }
+/*.row-no-padding > [class*="left"] {
+    padding-left: 0 !important;
+}
+.row-no-padding > [class*="right"] {
+    padding-right: 0 !important;
+}
+*/
+/* TODO: automatic injection from grunt */
+@import 'd3';

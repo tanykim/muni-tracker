@@ -1,0 +1,268 @@
+/* common setting */
+/* font size: 24, 18, 16, 14, 12 px*/
+/* colors */
+/* general color array: will be modified later */
+/* blue jeans */
+/* grapefruit */
+/* mint */
+/* sunflower */
+/* aqua */
+/* bittersweet */
+/* grass */
+/* lavender */
+/* pink rose */
+/* borders */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'San Francisco', Helvetica;
+}
+.link {
+  cursor: pointer;
+}
+/*
+@font-size: 14;
+@em: @font-size * 1em;
+
+@media screen {
+    body {
+        font-size: @font-size / @em;
+    }
+}
+@media screen and (min-width: 768px) {
+    body {
+        font-size: (@font-size + 2) / @em;
+    }
+}
+@media screen and (min-width: 992px) {
+    body {
+        font-size: (@font-size + 3) / @em;
+    }
+}
+@media screen and (min-width: 1200px) {
+    body {
+        font-size: (@font-size + 4) / @em;
+    }
+}
+*/
+/* main */
+.loading {
+  font-size: 2.8em;
+  width: 100%;
+  text-align: center;
+  vertical-align: middle;
+  position: absolute;
+  top: 50%;
+  left: 0;
+}
+.info .title {
+  font-size: 16pt;
+  text-align: center;
+}
+.info .selected {
+  cursor: default !important;
+  font-style: italic;
+  color: #999999;
+}
+.info .selected:hover,
+.info .selected:active {
+  background-color: #fff !important;
+  color: #999999;
+}
+/*.map-control {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #999;
+    font-size: @large;
+}*/
+/* bootstrap tweek */
+.container {
+  width: 100% !important;
+}
+.nav,
+.pagination,
+.carousel,
+.panel-title,
+.btn-group a {
+  cursor: pointer;
+}
+/*.row-no-padding > [class*="left"] {
+    padding-left: 0 !important;
+}
+.row-no-padding > [class*="right"] {
+    padding-right: 0 !important;
+}
+*/
+/* TODO: automatic injection from grunt */
+/* font size: 24, 18, 16, 14, 12 px*/
+/*@huge: 1.5em;
+@large: 1.128em;
+@normal: 1em;
+@small: 0.875em;
+@tiny: 0.75em;
+*/
+/* colors */
+/* lables or text */
+.pos-start {
+  text-anchor: start;
+}
+.pos-middle {
+  text-anchor: middle;
+}
+.pos-end {
+  text-anchor: end;
+}
+.v-middle {
+  alignment-baseline: middle;
+}
+.v-central {
+  alignment-baseline: central;
+}
+.v-top {
+  alignment-baseline: hanging;
+}
+.size-tiny {
+  font-size: 6pt;
+}
+.size-small {
+  font-size: 10pt;
+}
+.size-normal {
+  font-size: 12pt;
+}
+.size-large {
+  font-size: 16pt;
+}
+.size-huge {
+  font-size: 32pt;
+}
+.weight-bold {
+  font-weight: bold;
+}
+/* line */
+.stroke-black {
+  stroke: #000;
+}
+.stroke-darkGrey {
+  stroke: #666666;
+}
+.stroke-grey {
+  stroke: #999999;
+}
+.stroke-lightGrey {
+  stroke: #e5e5e5;
+}
+.stroke-lightestGrey {
+  stroke: #fafafa;
+}
+.stroke-color0 {
+  stroke: #4A89DC;
+}
+.stroke-color1 {
+  stroke: #DA4453;
+}
+.stroke-color2 {
+  stroke: #37BC9B;
+}
+.stroke-color3 {
+  stroke: #F6BB42;
+}
+.stroke-color4 {
+  stroke: #3BAFDA;
+}
+.stroke-none {
+  stroke: none;
+}
+.stroke-1 {
+  stroke-width: 1;
+}
+.stroke-2 {
+  stroke-width: 2;
+}
+.stroke-dashed {
+  stroke-dasharray: 4, 2;
+}
+/* fill */
+.fill-black {
+  fill: #000;
+}
+.fill-darkGrey {
+  fill: #666666;
+}
+.fill-grey {
+  fill: #999999;
+}
+.fill-lightGrey {
+  fill: #e5e5e5;
+}
+.fill-lightestGrey {
+  fill: #fafafa;
+}
+.fill-white {
+  fill: #fff;
+}
+.fill-none {
+  fill: none;
+}
+.fill-color1 {
+  fill: #DA4453;
+}
+.fill-color2 {
+  fill: #37BC9B;
+}
+.fill-color3 {
+  fill: #F6BB42;
+}
+.fill-color3 {
+  fill: #F6BB42;
+}
+.fill-color3 {
+  fill: #F6BB42;
+}
+.axis-lable {
+  font-size: 6pt;
+  fill: #999999;
+  text-anchor: middle;
+}
+.stroke-axis {
+  stroke: rgba(153, 153, 153, 0.2);
+}
+.axis text {
+  font-size: 6pt;
+  stroke: none;
+  fill: #999999;
+}
+.axis path,
+.axis line {
+  fill: none;
+  shape-rendering: crispEdges;
+  stroke: rgba(153, 153, 153, 0.2);
+}
+/* vis elements */
+.vis .title {
+  font-size: 32pt;
+  alignment-baseline: hanging;
+  font-weight: bold;
+}
+.vis .headline {
+  font-size: 12pt;
+  alignment-baseline: hanging;
+}
+.vis .block {
+  stroke: none;
+}
+.label-year {
+  font-size: 16pt;
+  alignment-baseline: hanging;
+}
+.label-month {
+  font-size: 12pt;
+  alignment-baseline: hanging;
+}
+.label-week,
+.label-day {
+  font-size: 10pt;
+  alignment-baseline: hanging;
+}

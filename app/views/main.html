@@ -1,0 +1,62 @@
+<!-- left dialogue -->
+<div class="col-xs-3">
+    <h1>Muni Tracker</h1>
+    <div ng-show="loadingDone" class="info">
+
+        <h3> Select upto {{ maxRouteNum }} routes </h3>
+
+        <!-- selected route info -->
+        <table class="table table-condensed" ng-show="selectedRoutes.length > 0">
+            <thead>
+                <tr>
+                    <th colspan="3">Route</th>
+                    <th colspan="2">Vehicles</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="r in selectedRoutes">
+                    <td style="background-color: {{ r.color }}">..</td>
+                    <td> {{ r.tag }} </td>
+                    <td> {{ r.title }} </td>
+                    <td>
+                        <div ng-repeat="(tag, val) in r.countByDir" ng-if="val.count > 0"> {{ val.name }}: {{ val.count }} </div>
+                    </td>
+                    <td> <span class="link" ng-click="removeRoute($index, r.tag)">remove</span> </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- when there's no selected routes -->
+        <div ng-show="selectedRoutes.length == 0">
+            No routes selected
+        </div>
+
+        <!-- when over maximum route number -->
+        <h5 ng-if="error"> {{ errorMsg }} </h5>
+
+        <!-- route select list -->
+        <div class="btn-group" uib-dropdown is-open="status.isopen">
+            <button id="single-button" type="button" class="btn btn-primary" uib-dropdown-toggle ng-disabled="disabled">
+                Select a Muni route <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li role="menuitem" ng-repeat="r in allRoutes">
+                    <a ng-click="selectRoute($index, r.tag)" ng-if="!r.selected">{{ r.tag }} | {{ r.title }}</a>
+                    <a ng-if="r.selected" class="selected">{{ r.tag }} | {{ r.title }}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- right map -->
+<div class="col-xs-9 js-map full-width"></div>
+<!-- <div class="map-control" ng-if="loadingDone">
+    <div class="js-map-in"><a ng-click="zoomMap(1)">Zoom In</a></div>
+    <div class="js-map-out"><a ng-click="zoomMap(-1)">Zoom Out</a></div>
+</div> -->
+
+<!-- loading -->
+<div class="loading" ng-if="!loadingDone">
+    Loading map now...
+</div>
