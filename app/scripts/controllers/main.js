@@ -25,13 +25,18 @@ angular.module('trackerApp').controller('MainCtrl', [
         //selected Routes
         $scope.selectedRoutes = [];
 
+        //setTimeout variables for each route
+        var callAPIsetTimeouts = {};
+
         $scope.selectRoute = function (id, tag) {
 
+            //when more than max routes are selected
             if ($scope.selectedRoutes.length === $scope.maxRouteNum) {
                 $scope.error = true;
                 $scope.errorMsg = 'Remove one of the selected route before you select a new one.';
                 return false;
             }
+
             //get route info from all routes
             var routeInfo = _.filter($scope.allRoutes, function (r) {
                 return r.tag === tag;
@@ -61,14 +66,26 @@ angular.module('trackerApp').controller('MainCtrl', [
             };
             $scope.selectedRoutes.push(newRoute);
             $scope.allRoutes[id].selected = true;
-            dataLoader.getRouteLocation(newRoute, mapDrawer.drawRouteLocation);
+
+            //call API every 15 seconds
+            (function callAPI() {
+                console.log(tag);
+                callAPIsetTimeouts[tag] = setTimeout(callAPI, 15000);
+                dataLoader.getRouteLocation(newRoute, drawRouteLocation.drawRouteLocation);
+            })();
+
         };
 
         $scope.removeRoute = function (id, tag) {
-            $scope.error = false;
+
+            //stop the setTimeout
+            clearTimeout(callAPIsetTimeouts[tag]);
+
             $scope.selectedRoutes = _.filter($scope.selectedRoutes, function (route) {
                 return route.tag !== tag;
             });
+            //because now the number of selected routes is alreays less than 5
+            $scope.error = false;
 
             //unmark deselected routes from the route list
             for (var i = 0; i < $scope.allRoutes.length; i++) {

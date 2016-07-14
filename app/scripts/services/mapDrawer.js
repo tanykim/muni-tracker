@@ -10,6 +10,10 @@ angular.module('trackerApp').factory('mapDrawer', [
     //canvas and geoPath used for all
     var dim, vis, projection, path;
 
+    /****
+    // Base Map -- streets, neighborhood name, and all muni routes path
+    ****/
+
     //draw street path
     function drawStreets(data) {
         vis.selectAll('.js-st').data(data.features).enter().append('path')
@@ -110,13 +114,17 @@ angular.module('trackerApp').factory('mapDrawer', [
                     .scaleExtent([1, 8])
                     .on('zoom', zoomed));
 
+            //get objects of routes info used for HTML/main.js
             var routesInfo = getRoutesInfo(res[2].data);
 
             loadingDoneCallback(routesInfo);
         });
     };
+    /* end of base map */
 
     this.drawRouteLocation = function (data, route) {
+
+        //check if the route is called first (initial call from setTimeout)
 
         //highlight route path
         d3.selectAll('.js-routes-' + route.tag)
@@ -129,32 +137,30 @@ angular.module('trackerApp').factory('mapDrawer', [
         if (!_.isNull(data)) {
             _.each(data.geometry.coordinates, function (stops, i) {
 
+                //stop points
                 var x = projection(stops)[0];
                 var y = projection(stops)[1];
 
-                //TODO: draw shape to reflect the direction??
-                // var angle = +data.properties.angle[i];
-                // var sp = 'M ' + x + ' ' + y;
-                // var center = 4;
-                // var side = Math.sqrt(center * center * 4 / 5);
-                // vis.append('path')
-                //     .attr('d', function () {
-                //         return sp + ' v ' + -center + ' l ' + side + ' ' + (center + side / 2) +
-                //             ' h ' + -side * 2 +
-                //             ' l ' + side + ' ' + -(center + side / 2);
-                //     })
-                //     .attr('transform', 'rotate(' + angle + ' ' +
-                //         (x + side / 2) + ' ' + (y + side / 2) + ')')
-                //     .attr('fill', route.color)
-                //     .attr('class', 'js-location-' + route.tag + ' js-location-' + route.tag + '-' + i);
+                //triangle dimension
+                var height = 8;
+                var width = 6;
 
-                vis.append('circle')
-                    .attr('cx', x)
-                    .attr('cy', y)
-                    .attr('r', 2)
+                //starting point - center of the triangle
+                var sp = 'M ' + x + ' ' + (y - height / 2);
+
+                //draw vehicle as triangle - top is the direction
+                vis.append('path')
+                    .attr('d', function () {
+                        return sp +
+                            ' l ' + (width / 2) + ' ' + height + //right edge
+                            ' h ' + -width + ' z '; //left edge
+                    })
+                    .attr('transform', 'rotate(' + (+data.properties.angle[i]) + ' ' +
+                         x + ' ' + y + ')')
                     .style('fill', route.color)
                     .style('stroke', 'black')
-                    .attr('class', 'js-location-' + route.tag + ' js-location-' + route.tag + '-' + i);
+                    .attr('class', 'js-location-' + route.tag +
+                        ' js-location-' + route.tag + '-' + data.properties.vehicleId[i]);
             });
         }
     };

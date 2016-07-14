@@ -36,7 +36,7 @@ angular.module('trackerApp').factory('dataLoader', [
             var validVehicles = _.filter(angular.copy(res.vehicle), function (v) {
                 return v._dirTag;
             });
-
+            console.log(validVehicles);
             var vehicleGeoJson = {
                 geometry: {
                     type: 'MultiPoint',
@@ -45,9 +45,8 @@ angular.module('trackerApp').factory('dataLoader', [
                     })
                 },
                 properties: {
-                    angle: _.map(angular.copy(validVehicles), function (v) {
-                        return v._heading;
-                    })
+                    angle: _.pluck(angular.copy(validVehicles), '_heading'),
+                    vehicleId: _.pluck(angular.copy(validVehicles), '_id')
                 }
             };
             visDrawer(vehicleGeoJson, selectedRoute);
