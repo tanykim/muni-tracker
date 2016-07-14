@@ -177,6 +177,7 @@ angular.module('trackerApp').factory('mapDrawer', [
                         .style('fill', route.color)
                         .style('stroke', 'black')
                         .attr('class', 'js-location-' + route.tag +
+                            ' js-location-' + route.tag + '-' + data.properties.dirTags[i] +
                             ' js-location-' + route.tag + '-' + id);
                 }
             });
@@ -232,7 +233,8 @@ angular.module('trackerApp').factory('mapDrawer', [
                     .style('fill', route.color)
                     .style('stroke', 'black')
                     .attr('class', 'js-location-' + route.tag +
-                        ' js-location-' + route.tag + '-' + data.properties.vehicleIds[i]);
+                        ' js-location-' + route.tag + '-' + data.properties.vehicleIds[i] +
+                        ' js-location-' + route.tag + '-' + data.properties.dirTags[i]);
             });
         }
     };
@@ -241,6 +243,13 @@ angular.module('trackerApp').factory('mapDrawer', [
         d3.selectAll('.js-routes-' + tag).style('opacity', 0).lower();
         d3.selectAll('.js-location-' + tag).remove();
         selectedRoutes = _.omit(selectedRoutes, tag);
+    };
+
+    this.toggleDirection = function (routeTag, dirTag, val) {
+
+        //if val is true, hide the selected route>direction
+        var opacity = val ? 0 : 1;
+        d3.selectAll('.js-location-' + routeTag + '-' + dirTag).style('opacity', opacity);
     };
 
     return this;

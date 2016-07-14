@@ -33,8 +33,9 @@ angular.module('trackerApp').factory('dataLoader', [
 
             //vehicles that does not have "_dirTag" are ommitted
             //(assuming there are not in service)
+            //consider vehicles whose direction is original one from the route info
             var validVehicles = _.filter(angular.copy(res.vehicle), function (v) {
-                return v._dirTag;
+                return _.contains(_.keys(selectedRoute.countByDir), v._dirTag);
             });
             var vehicleGeoJson = {
                 geometry: {
@@ -45,7 +46,8 @@ angular.module('trackerApp').factory('dataLoader', [
                 },
                 properties: {
                     angles: _.pluck(angular.copy(validVehicles), '_heading'),
-                    vehicleIds: _.pluck(angular.copy(validVehicles), '_id')
+                    vehicleIds: _.pluck(angular.copy(validVehicles), '_id'),
+                    dirTags: _.pluck(angular.copy(validVehicles), '_dirTag')
                 }
             };
             visDrawer(vehicleGeoJson, selectedRoute);

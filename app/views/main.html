@@ -14,14 +14,20 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="r in selectedRoutes">
+                <tr ng-repeat="(index, r) in selectedRoutes">
                     <td style="background-color: {{ r.color }}">..</td>
                     <td> {{ r.tag }} </td>
                     <td> {{ r.title }} </td>
                     <td>
-                        <div ng-repeat="(tag, val) in r.countByDir" ng-if="val.count > 0"> {{ val.name }}: {{ val.count }} </div>
+                        <div ng-repeat="(tag, val) in r.countByDir" ng-if="val.count > 0">
+                            {{ val.name }}: {{ val.count }}
+                            <span ng-click="hideDirection(index, r.tag, tag, !val.isHidden)" class="link">
+                                <span ng-show="!val.isHidden"> hide </span>
+                                <span ng-show="val.isHidden"> show </span>
+                            </span>
+                        </div>
                     </td>
-                    <td> <span class="link" ng-click="removeRoute($index, r.tag)">remove</span> </td>
+                    <td> <span class="link" ng-click="removeRoute(index, r.tag)">remove</span> </td>
                 </tr>
             </tbody>
         </table>

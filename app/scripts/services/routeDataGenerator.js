@@ -49,13 +49,14 @@ angular.module('trackerApp').factory('routeDataGenerator', [
                             stopId: d._stopId,
                             tag: d._tag,
                             title: d._title
+                            //TODO: add direction of stops
                         };
                     })
                 };
             });
 
             var geoJsonList = _.map(allRoutesData, function (routeData) {
-                var featureList = _.map(routeData.path, function (p) {
+                var featureList = _.map(routeData.path, function (p, i) {
                     var coorList = _.map(p.point, function (d) {
                         return [+d._lon, +d._lat];
                     });
@@ -64,6 +65,9 @@ angular.module('trackerApp').factory('routeDataGenerator', [
                         geometry: {
                             type: 'LineString',
                             coordinates: coorList
+                        },
+                        properties: {
+                            dirTag: routeData.directions[i].tag
                         }
                     };
                 });

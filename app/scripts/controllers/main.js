@@ -54,12 +54,12 @@ angular.module('trackerApp').controller('MainCtrl', [
                 }
             }
 
-            //make a new route information
+            //make a new route object
             var newRoute = {
                 tag: tag,
                 title: routeInfo.title,
                 countByDir: _.object(_.map(angular.copy(routeInfo.directions), function (d) {
-                    return [d.tag, { name: d.name, count: 0 }];
+                    return [d.tag, { name: d.name, count: 0, isHidden: false }];
                 })),
                 color: newColor,
                 id: id
@@ -71,7 +71,7 @@ angular.module('trackerApp').controller('MainCtrl', [
             (function callAPI() {
                 console.log(tag);
                 dataLoader.getRouteLocation(newRoute, mapDrawer.drawVehiclesLocation);
-                callAPIsetTimeouts[tag] = setTimeout(callAPI, 5000);
+                callAPIsetTimeouts[tag] = setTimeout(callAPI, 15000);
             })();
 
         };
@@ -81,6 +81,7 @@ angular.module('trackerApp').controller('MainCtrl', [
             //stop the setTimeout
             clearTimeout(callAPIsetTimeouts[tag]);
 
+            //remove the selected route
             $scope.selectedRoutes = _.filter($scope.selectedRoutes, function (route) {
                 return route.tag !== tag;
             });
@@ -94,9 +95,15 @@ angular.module('trackerApp').controller('MainCtrl', [
                     break;
                 }
             }
-
             //update map
             mapDrawer.removeRoute(tag);
+        };
+
+        $scope.hideDirection = function (id, routeTag, dirTag, val) {
+
+            $scope.selectedRoutes[id].countByDir[dirTag].isHidden = val;
+            //console.log(id, routeTag, dirTag, val, $scope.selectedRoutes);
+            mapDrawer.toggleDirection(routeTag, dirTag, val);
         };
 
         //when loading is done --> set all routes, draw route location, update route info
