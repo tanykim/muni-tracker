@@ -10,6 +10,11 @@ angular.module('trackerApp').factory('mapDrawer', [
     //canvas and geoPath used for all
     var dim, vis, projection, path;
 
+    //zoom and pan for the map
+    function zoomed() {
+        vis.attr('transform', d3.event.transform);
+    }
+
     /****
     // Base Map -- streets, neighborhood name, and all muni routes path
     ****/
@@ -65,10 +70,6 @@ angular.module('trackerApp').factory('mapDrawer', [
         });
     }
 
-    function zoomed() {
-        vis.attr('transform', d3.event.transform);
-    }
-
     this.loadBaseMap = function(loadingDoneCallback) {
 
         //width and height of the base map
@@ -122,18 +123,101 @@ angular.module('trackerApp').factory('mapDrawer', [
     };
     /* end of base map */
 
-    this.drawRouteLocation = function (data, route) {
+    var selectedRoutes = {};
+
+    function getVehicleShape(x, y) {
+
+        //triangle dimension
+        var height = 8;
+        var width = 6;
+
+        //starting point - center of the triangle
+        var sp = 'M ' + x + ' ' + (y - height / 2);
+
+        return sp +
+            ' l ' + (width / 2) + ' ' + height + //right edge
+            ' h ' + -width + ' z '; //left edge
+    }
+
+    function getVehicleRotation(angle, x, y) {
+        return 'rotate(' + angle + ' ' + x + ' ' + y + ')';
+    }
+
+    function updateVehiclesLocation(data, route) {
+
+        //when new data is successfully gotten
+        if (!_.isNull(data)) {
+
+            var oldIds = selectedRoutes[route.tag];
+            var newIds = data.properties.vehicleIds;
+            console.log('differences--', _.difference(oldIds, newIds));
+
+            //check with vehicle IDs from the new data
+            _.each(newIds, function (id, i) {
+
+                //stop points
+                var stops = data.geometry.coordinates[i];
+                var x = projection(stops)[0];
+                var y = projection(stops)[1];
+                var angle = +data.properties.angles[i];
+
+                //check if vehicle with the ID is drawn previously
+                if (_.contains(oldIds, id)) {
+                    //transition of each vehicle
+                    //FIX: transition properly when direciton changes
+                    d3.select('.js-location-' + route.tag + '-' + id)
+                        .transition()
+                        .attr('d', getVehicleShape(x, y))
+                        .attr('transform', getVehicleRotation(angle, x, y));
+                } else {
+                    //draw new vehicle
+                    vis.append('path')
+                        .attr('d', getVehicleShape(x, y))
+                        .attr('transform', getVehicleRotation(angle, x, y))
+                        .style('fill', route.color)
+                        .style('stroke', 'black')
+                        .attr('class', 'js-location-' + route.tag +
+                            ' js-location-' + route.tag + '-' + id);
+                }
+            });
+
+            //remove vehicles that are not seen in the new data
+            _.each(_.difference(oldIds, newIds), function (id) {
+                d3.select('.js-location-' + route.tag + '-' + id).remove();
+            });
+
+            //update vehicle IDs of the selected route
+            selectedRoutes[route.tag] = newIds;
+
+        } else {
+            //remove previously drawn locations and make vehicleIds empty
+            d3.selectAll('.js-location-' + route.tag).remove();
+            selectedRoutes[route.tag] = [];
+        }
+
+    }
+
+    this.drawVehiclesLocation = function (data, route) {
 
         //check if the route is called first (initial call from setTimeout)
+        if (_.contains(_.keys(selectedRoutes), route.tag)) {
+            //show the route animation of the vehicle location change
+            console.log('---already called', route.tag);
+            updateVehiclesLocation(data, route);
+            return false;
+        }
 
-        //highlight route path
+        //called for the first time
+        console.log('---draw initial locatin for', route.tag);
+        selectedRoutes[route.tag] = data.properties.vehicleIds;
+
+        //highlight route path even if there's no vehicle returned
         d3.selectAll('.js-routes-' + route.tag)
             .style('stroke', route.color)
             .style('opacity', 1)
             .raise();
 
-        //TODO: add data-value or i as stop ID
-        //draw vehicle when data update is successful
+        //draw vehicle only when data update is successful
         if (!_.isNull(data)) {
             _.each(data.geometry.coordinates, function (stops, i) {
 
@@ -141,26 +225,14 @@ angular.module('trackerApp').factory('mapDrawer', [
                 var x = projection(stops)[0];
                 var y = projection(stops)[1];
 
-                //triangle dimension
-                var height = 8;
-                var width = 6;
-
-                //starting point - center of the triangle
-                var sp = 'M ' + x + ' ' + (y - height / 2);
-
                 //draw vehicle as triangle - top is the direction
                 vis.append('path')
-                    .attr('d', function () {
-                        return sp +
-                            ' l ' + (width / 2) + ' ' + height + //right edge
-                            ' h ' + -width + ' z '; //left edge
-                    })
-                    .attr('transform', 'rotate(' + (+data.properties.angle[i]) + ' ' +
-                         x + ' ' + y + ')')
+                    .attr('d', getVehicleShape(x, y))
+                    .attr('transform', getVehicleRotation(+data.properties.angles[i], x, y))
                     .style('fill', route.color)
                     .style('stroke', 'black')
                     .attr('class', 'js-location-' + route.tag +
-                        ' js-location-' + route.tag + '-' + data.properties.vehicleId[i]);
+                        ' js-location-' + route.tag + '-' + data.properties.vehicleIds[i]);
             });
         }
     };
@@ -168,6 +240,7 @@ angular.module('trackerApp').factory('mapDrawer', [
     this.removeRoute = function (tag) {
         d3.selectAll('.js-routes-' + tag).style('opacity', 0).lower();
         d3.selectAll('.js-location-' + tag).remove();
+        selectedRoutes = _.omit(selectedRoutes, tag);
     };
 
     return this;

@@ -31,12 +31,11 @@ angular.module('trackerApp').factory('dataLoader', [
             var res = x2js.xml_str2json(data.data).body;
             lastTime = res.lastTime._time;
 
-            //TODO: valid vehicles by directions
-            //vehicles that does not have "_dirTag" are not driving now (i.e., parked)
+            //vehicles that does not have "_dirTag" are ommitted
+            //(assuming there are not in service)
             var validVehicles = _.filter(angular.copy(res.vehicle), function (v) {
                 return v._dirTag;
             });
-            console.log(validVehicles);
             var vehicleGeoJson = {
                 geometry: {
                     type: 'MultiPoint',
@@ -45,8 +44,8 @@ angular.module('trackerApp').factory('dataLoader', [
                     })
                 },
                 properties: {
-                    angle: _.pluck(angular.copy(validVehicles), '_heading'),
-                    vehicleId: _.pluck(angular.copy(validVehicles), '_id')
+                    angles: _.pluck(angular.copy(validVehicles), '_heading'),
+                    vehicleIds: _.pluck(angular.copy(validVehicles), '_id')
                 }
             };
             visDrawer(vehicleGeoJson, selectedRoute);
