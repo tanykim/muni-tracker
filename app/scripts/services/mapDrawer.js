@@ -123,6 +123,8 @@ angular.module('trackerApp').factory('mapDrawer', [
     };
     /* end of base map */
 
+    //location, angle, id of each vehicle by route tag
+    //updated after new data arrives
     var selectedRoutes = {};
 
     function getVehicleShape(x, y) {
@@ -143,16 +145,36 @@ angular.module('trackerApp').factory('mapDrawer', [
         return 'rotate(' + angle + ' ' + x + ' ' + y + ')';
     }
 
+    function setVehicleInfo(prop, x, y) {
+        var angleById = _.zip(prop.vehicleIds, prop.angles);
+        return _.object(_.map(angleById, function (d) {
+                return [d[0], { angle: d[1], x: x, y: y }];
+            }));
+    }
+
+    function drawVehicleShape(angle, x, y, dirTag, route, id) {
+
+        //vehicle triangle - rotate according to the angle
+        vis.append('path')
+            .attr('d', getVehicleShape(x, y))
+            .attr('transform', getVehicleRotation(angle, x, y))
+            .style('fill', route.color)
+            .style('stroke', 'black')
+            .attr('class', 'js-loc-' + route.tag +
+                ' js-loc-' + route.tag + '-' + id +
+                ' js-loc-' + route.tag + '-' + dirTag);
+    }
+
     function updateVehiclesLocation(data, route) {
 
         //when new data is successfully gotten
         if (!_.isNull(data)) {
 
-            var oldIds = selectedRoutes[route.tag];
+            var oldIds = _.keys(selectedRoutes[route.tag]);
             var newIds = data.properties.vehicleIds;
-            console.log('differences--', _.difference(oldIds, newIds));
 
-            //check with vehicle IDs from the new data
+            //all vehicle IDs from the new data
+            var newIdsInfo = setVehicleInfo(data.properties, null, null);
             _.each(newIds, function (id, i) {
 
                 //stop points
@@ -161,87 +183,103 @@ angular.module('trackerApp').factory('mapDrawer', [
                 var y = projection(stops)[1];
                 var angle = +data.properties.angles[i];
 
-                //check if vehicle with the ID is drawn previously
+                //vehicles with the ID is drawn previously
                 if (_.contains(oldIds, id)) {
-                    //transition of each vehicle
-                    //FIX: transition properly when direciton changes
-                    d3.select('.js-location-' + route.tag + '-' + id)
-                        .transition()
-                        .attr('d', getVehicleShape(x, y))
-                        .attr('transform', getVehicleRotation(angle, x, y));
+
+                    //previous angle, x, y of the ID - used for correct transition
+                    var prev = selectedRoutes[route.tag][id];
+
+                    //set transition only if the position changes
+                    if (prev.x !== x || prev.y !== y) {
+                        d3.select('.js-loc-' + route.tag + '-' + id)
+                            .style('stroke', 'red')
+                            .transition()
+                            .attrTween('d', function () {
+                                return d3.interpolateString(
+                                    getVehicleShape(prev.x, prev.y),
+                                    getVehicleShape(x, y)
+                                );
+                            })
+                            .attrTween('transform', function () {
+                                return d3.interpolateString(
+                                    getVehicleRotation(prev.angle, prev.x, prev.y),
+                                    getVehicleRotation(angle, x, y)
+                                );
+                            });
+                    } else {
+                        d3.select('.js-loc-' + route.tag + '-' + id)
+                            .style('stroke', 'black');
+                    }
                 } else {
                     //draw new vehicle
-                    vis.append('path')
-                        .attr('d', getVehicleShape(x, y))
-                        .attr('transform', getVehicleRotation(angle, x, y))
-                        .style('fill', route.color)
-                        .style('stroke', 'black')
-                        .attr('class', 'js-location-' + route.tag +
-                            ' js-location-' + route.tag + '-' + data.properties.dirTags[i] +
-                            ' js-location-' + route.tag + '-' + id);
+                    drawVehicleShape(angle, x, y, data.properties.dirTags[i], route, id);
                 }
+                newIdsInfo[id].x = x;
+                newIdsInfo[id].y = y;
             });
+
+            //update vehicle ID info
+            selectedRoutes[route.tag] = newIdsInfo;
 
             //remove vehicles that are not seen in the new data
             _.each(_.difference(oldIds, newIds), function (id) {
-                d3.select('.js-location-' + route.tag + '-' + id).remove();
+                d3.select('.js-loc-' + route.tag + '-' + id).remove();
             });
-
-            //update vehicle IDs of the selected route
-            selectedRoutes[route.tag] = newIds;
 
         } else {
             //remove previously drawn locations and make vehicleIds empty
-            d3.selectAll('.js-location-' + route.tag).remove();
-            selectedRoutes[route.tag] = [];
+            d3.selectAll('.js-loc-' + route.tag).remove();
+            selectedRoutes[route.tag] = {};
         }
 
     }
 
     this.drawVehiclesLocation = function (data, route) {
 
-        //check if the route is called first (initial call from setTimeout)
-        if (_.contains(_.keys(selectedRoutes), route.tag)) {
-            //show the route animation of the vehicle location change
-            console.log('---already called', route.tag);
-            updateVehiclesLocation(data, route);
-            return false;
-        }
-
-        //called for the first time
-        console.log('---draw initial locatin for', route.tag);
-        selectedRoutes[route.tag] = data.properties.vehicleIds;
-
         //highlight route path even if there's no vehicle returned
         d3.selectAll('.js-routes-' + route.tag)
             .style('stroke', route.color)
-            .style('opacity', 1)
-            .raise();
+            .style('opacity', 1);
 
         //draw vehicle only when data update is successful
         if (!_.isNull(data)) {
+
+            //check if the route is called first (initial call from setTimeout)
+            //then update the vehicles, not draw
+            if (_.contains(_.keys(selectedRoutes), route.tag)) {
+                //show the route animation of the vehicle location change
+                console.log('---already called', route.tag);
+                updateVehiclesLocation(data, route);
+                return false;
+            }
+
+            //called for the first time -- raise to the top
+            console.log('---draw initial locatin for', route.tag);
+            d3.selectAll('.js-routes-' + route.tag).raise();
+
+            //update object of selected route
+            selectedRoutes[route.tag] = setVehicleInfo(data.properties, null, null);
+
             _.each(data.geometry.coordinates, function (stops, i) {
 
                 //stop points
                 var x = projection(stops)[0];
                 var y = projection(stops)[1];
+                var id = data.properties.vehicleIds[i];
+                //add x, y position to the route info
+                selectedRoutes[route.tag][id].x = x;
+                selectedRoutes[route.tag][id].y = y;
 
                 //draw vehicle as triangle - top is the direction
-                vis.append('path')
-                    .attr('d', getVehicleShape(x, y))
-                    .attr('transform', getVehicleRotation(+data.properties.angles[i], x, y))
-                    .style('fill', route.color)
-                    .style('stroke', 'black')
-                    .attr('class', 'js-location-' + route.tag +
-                        ' js-location-' + route.tag + '-' + data.properties.vehicleIds[i] +
-                        ' js-location-' + route.tag + '-' + data.properties.dirTags[i]);
+                drawVehicleShape(+data.properties.angles[i], x, y, data.properties.dirTags[i],
+                    route, id);
             });
         }
     };
 
     this.removeRoute = function (tag) {
         d3.selectAll('.js-routes-' + tag).style('opacity', 0).lower();
-        d3.selectAll('.js-location-' + tag).remove();
+        d3.selectAll('.js-loc-' + tag).remove();
         selectedRoutes = _.omit(selectedRoutes, tag);
     };
 
@@ -249,7 +287,7 @@ angular.module('trackerApp').factory('mapDrawer', [
 
         //if val is true, hide the selected route>direction
         var opacity = val ? 0 : 1;
-        d3.selectAll('.js-location-' + routeTag + '-' + dirTag).style('opacity', opacity);
+        d3.selectAll('.js-loc-' + routeTag + '-' + dirTag).style('opacity', opacity);
     };
 
     return this;

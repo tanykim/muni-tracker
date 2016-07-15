@@ -22,7 +22,8 @@ angular.module('trackerApp').controller('MainCtrl', [
         //colors for route;
         var colors = ['#4A89DC', '#DA4453', '#37BC9B', '#F6BB42', '#8CC152'];
 
-        //selected Routes
+        //selected Routes - generated from routes.json
+        //used in mapDrawer
         $scope.selectedRoutes = [];
 
         //setTimeout variables for each route
@@ -71,7 +72,7 @@ angular.module('trackerApp').controller('MainCtrl', [
             (function callAPI() {
                 console.log(tag);
                 dataLoader.getRouteLocation(newRoute, mapDrawer.drawVehiclesLocation);
-                callAPIsetTimeouts[tag] = setTimeout(callAPI, 15000);
+                callAPIsetTimeouts[tag] = setTimeout(callAPI, 2000);
             })();
 
         };
@@ -99,10 +100,8 @@ angular.module('trackerApp').controller('MainCtrl', [
             mapDrawer.removeRoute(tag);
         };
 
-        $scope.hideDirection = function (id, routeTag, dirTag, val) {
-
+        $scope.toggleDirection = function (id, routeTag, dirTag, val) {
             $scope.selectedRoutes[id].countByDir[dirTag].isHidden = val;
-            //console.log(id, routeTag, dirTag, val, $scope.selectedRoutes);
             mapDrawer.toggleDirection(routeTag, dirTag, val);
         };
 

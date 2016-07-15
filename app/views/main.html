@@ -21,7 +21,7 @@
                     <td>
                         <div ng-repeat="(tag, val) in r.countByDir" ng-if="val.count > 0">
                             {{ val.name }}: {{ val.count }}
-                            <span ng-click="hideDirection(index, r.tag, tag, !val.isHidden)" class="link">
+                            <span ng-click="toggleDirection(index, r.tag, tag, !val.isHidden)" class="link">
                                 <span ng-show="!val.isHidden"> hide </span>
                                 <span ng-show="val.isHidden"> show </span>
                             </span>
