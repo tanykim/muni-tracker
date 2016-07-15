@@ -45,17 +45,39 @@ angular.module('trackerApp').factory('mapDrawer', [
             .attr('class', 'js-nh pos-middel size-tiny');
     }
 
-    //draw pathes of all routes as transparent stroke
     function drawRoutes(data) {
         _.each(data, function (route) {
-            vis.selectAll('.js-routes-' + route.tag)
+
+            //draw pathes of all routes as transparent stroke
+            vis.selectAll('.js-routes-path-' + route.tag)
                 .data(route.featureList)
                 .enter()
                 .append('path')
                 .attr('d', path)
                 .style('fill', 'none')
                 .style('opacity', 0)
-                .attr('class', 'js-routes-' + route.tag);
+                .attr('class', 'js-routes-' + route.tag + //for route show/hide
+                    ' js-routes-path-' + route.tag); //for d3 data binding
+
+            //draw stops by direction
+            _.each(route.directions, function (dir) {
+                vis.selectAll('.js-routes-stop-' + route.tag + '-' + dir.tag)
+                    .data(dir.stops)
+                    .enter()
+                    .append('circle')
+                    .attr('cx', function (d) {
+                        return projection(d.coordinates)[0];
+                    })
+                    .attr('cy', function (d) {
+                        return projection(d.coordinates)[1];
+                    })
+                    .attr('r', 1)
+                    .style('fill', '#fff')
+                    .style('opacity', 0)
+                    .attr('class', 'js-routes-' + route.tag + //for route show/hide
+                        //' js-loc-' + route.tag + '-' + dir.tag + //for direction toggle
+                        ' js-routes-stop-' + route.tag + '-' + dir.tag); //for d3 data binding
+            });
         });
     }
 
@@ -160,9 +182,9 @@ angular.module('trackerApp').factory('mapDrawer', [
             .attr('transform', getVehicleRotation(angle, x, y))
             .style('fill', route.color)
             .style('stroke', 'black')
-            .attr('class', 'js-loc-' + route.tag +
-                ' js-loc-' + route.tag + '-' + id +
-                ' js-loc-' + route.tag + '-' + dirTag);
+            .attr('class', 'js-loc-' + route.tag + //used for add/remove of the route
+                ' js-loc-' + route.tag + '-' + id + //for transition
+                ' js-loc-' + route.tag + '-' + dirTag); //for direction toggle
     }
 
     function updateVehiclesLocation(data, route) {
@@ -190,6 +212,7 @@ angular.module('trackerApp').factory('mapDrawer', [
                     var prev = selectedRoutes[route.tag][id];
 
                     //set transition only if the position changes
+                    //TODO: enhance the style of transition
                     if (prev.x !== x || prev.y !== y) {
                         d3.select('.js-loc-' + route.tag + '-' + id)
                             .style('stroke', 'red')
@@ -248,13 +271,13 @@ angular.module('trackerApp').factory('mapDrawer', [
             //then update the vehicles, not draw
             if (_.contains(_.keys(selectedRoutes), route.tag)) {
                 //show the route animation of the vehicle location change
-                console.log('---already called', route.tag);
+                //console.log('---already called', route.tag);
                 updateVehiclesLocation(data, route);
                 return false;
             }
 
             //called for the first time -- raise to the top
-            console.log('---draw initial locatin for', route.tag);
+            console.log('---draw initial location for', route.tag);
             d3.selectAll('.js-routes-' + route.tag).raise();
 
             //update object of selected route
@@ -285,7 +308,7 @@ angular.module('trackerApp').factory('mapDrawer', [
 
     this.toggleDirection = function (routeTag, dirTag, val) {
 
-        //if val is true, hide the selected route>direction
+        //if val is true, hide all vehicles of the selected route
         var opacity = val ? 0 : 1;
         d3.selectAll('.js-loc-' + routeTag + '-' + dirTag).style('opacity', opacity);
     };

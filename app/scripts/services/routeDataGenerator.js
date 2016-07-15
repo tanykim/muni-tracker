@@ -15,6 +15,51 @@ angular.module('trackerApp').factory('routeDataGenerator', [
     // jscs:disable
     var x2js = new X2JS();
 
+    //route path infor as GeoJSON format
+    function getPathList(pathes) {
+        return _.map(pathes, function (p) {
+            return {
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: _.map(p.point, function (d) {
+                        return [+d._lon, +d._lat];
+                    })
+                }
+            };
+        });
+    }
+
+    //get info of each stop from the list of stops
+    function getStopInfo(stopTag, stops) {
+        var stopInfo;
+        for (var i = 0; i < stops.length; i++) {
+            if (stops[i]._tag === stopTag) {
+                stopInfo = stops[i];
+                break;
+            }
+        }
+        return stopInfo;
+    }
+
+    //multiple directions of one route including stop info
+    function getDirectionWithStopInfo(directions, stops) {
+        return _.map(directions, function (d) {
+            return {
+                tag: d._tag,
+                name: d._name,
+                title: d._title,
+                stops: _.map(stops, function (s) {
+                    var stopInfo = getStopInfo(s._tag, stops);
+                    return {
+                        coordinates: [+stopInfo._lon, +stopInfo._lat],
+                        title: stopInfo._title
+                    };
+                })
+            };
+        });
+    }
+
     function getRoutePaths(routes) {
 
         //parameters for API
@@ -28,60 +73,23 @@ angular.module('trackerApp').factory('routeDataGenerator', [
         });
 
         //all XML from API
-        $q.all(routePaths).then(function (res) {
-            var allRoutesData = _.map(res, function (d) {
-                var res = x2js.xml_str2json(d.data).body;
+        $q.all(routePaths).then(function (xmlData) {
+
+            console.log('--sucess: info of all routes');
+
+            var allRoutesData = _.map(xmlData, function (d) {
+                var routes = x2js.xml_str2json(d.data).body.route;
                 return {
-                    tag: res.route._tag,
-                    title: res.route._title.split('-')[1],
-                    path: res.route.path,
-                    directions: _.map(res.route.direction, function (d) {
-                        return {
-                            tag: d._tag,
-                            name: d._name,
-                            title: d._title
-                        };
-                    }),
-                    stops: _.map(res.route.stop, function (d) {
-                        return {
-                            lat: d._lat,
-                            lon: d._lon,
-                            stopId: d._stopId,
-                            tag: d._tag,
-                            title: d._title
-                            //TODO: add direction of stops
-                        };
-                    })
+                    featureList: getPathList(routes.path),
+                    tag: routes._tag,
+                    title: routes._title.split('-')[1],
+                    directions: getDirectionWithStopInfo(routes.direction, routes.stop)
                 };
             });
 
-            var geoJsonList = _.map(allRoutesData, function (routeData) {
-                var featureList = _.map(routeData.path, function (p, i) {
-                    var coorList = _.map(p.point, function (d) {
-                        return [+d._lon, +d._lat];
-                    });
-                    return {
-                        type: 'Feature',
-                        geometry: {
-                            type: 'LineString',
-                            coordinates: coorList
-                        },
-                        properties: {
-                            dirTag: routeData.directions[i].tag
-                        }
-                    };
-                });
-
-                return {
-                    tag: routeData.tag,
-                    title: routeData.title,
-                    featureList: featureList,
-                    directions: routeData.directions,
-                    stops: routeData.stops
-                };
-            });
+            console.log('--dataset generation done');
             //copy the output to routes.json
-            console.log(JSON.stringify(geoJsonList));
+            console.log(JSON.stringify(allRoutesData));
         });
     }
 
@@ -92,6 +100,9 @@ angular.module('trackerApp').factory('routeDataGenerator', [
                 a: 'sf-muni'
             }
         }).then(function (data) {
+
+            console.log('--sucess: route list');
+
             var res = x2js.xml_str2json(data.data).body;
             var routes = _.map(angular.copy(res.route), function (d) {
                 return d._tag;
