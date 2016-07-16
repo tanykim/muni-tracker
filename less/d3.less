@@ -1,25 +1,4 @@
-
-/* font size: 24, 18, 16, 14, 12 px*/
-/*@huge: 1.5em;
-@large: 1.128em;
-@normal: 1em;
-@small: 0.875em;
-@tiny: 0.75em;
-*/
-
-@huge: 32pt;
-@large: 16pt;
-@normal: 12pt;
-@small: 10pt;
-@tiny: 6pt;
-
-/* colors */
-@black: #000;
-@darkGrey: #666666;
-@grey: #999999;
-@lightGrey: #e5e5e5;
-@lightestGrey: #fafafa;
-@white: #fff;
+/* basic d3 style setup */
 
 /* lables or text */
 .pos-start {
@@ -75,21 +54,6 @@
 .stroke-lightestGrey {
     stroke: @lightestGrey;
 }
-.stroke-color0 {
-    stroke: @color0;
-}
-.stroke-color1 {
-    stroke: @color1;
-}
-.stroke-color2 {
-    stroke: @color2;
-}
-.stroke-color3 {
-    stroke: @color3;
-}
-.stroke-color4 {
-    stroke: @color4;
-}
 .stroke-none {
     stroke: none;
 }
@@ -124,66 +88,4 @@
 }
 .fill-none {
     fill: none;
-}
-.fill-color1{
-    fill: @color1;
-}
-.fill-color2{
-    fill: @color2;
-}
-.fill-color3{
-    fill: @color3;
-}
-.fill-color3{
-    fill: @color3;
-}
-.fill-color3{
-    fill: @color3;
-}
-
-.axis-lable {
-    .size-tiny();
-    .fill-grey();
-    .pos-middle();
-}
-.stroke-axis {
-    stroke: fade(@grey, 20%);
-}
-.axis text {
-    font-size: @tiny;
-    stroke: none;
-    fill: @grey;
-}
-.axis path, .axis line {
-    fill: none;
-    shape-rendering: crispEdges;
-    .stroke-axis();
-}
-
-/* vis elements */
-.vis {
-    .title {
-        .size-huge();
-        .v-top();
-        .weight-bold();
-    }
-    .headline {
-        .size-normal();
-        .v-top();
-    }
-    .block {
-        .stroke-none();
-    }
-}
-.label-year {
-    font-size: @large;
-    .v-top();
-}
-.label-month {
-    font-size: @normal;
-    .v-top();
-}
-.label-week, .label-day {
-    font-size: @small;
-    .v-top();
 }

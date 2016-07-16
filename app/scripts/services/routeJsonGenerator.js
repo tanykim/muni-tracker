@@ -1,6 +1,7 @@
+
 'use strict';
 
-angular.module('trackerApp').factory('routeDataGenerator', [
+angular.module('trackerApp').factory('routeJsonGenerator', [
     '$window',
     '$http',
     '$q',

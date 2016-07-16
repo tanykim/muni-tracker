@@ -1,68 +1,80 @@
 <!-- left dialogue -->
-<div class="col-xs-3">
-    <h1>Muni Tracker</h1>
-    <div ng-show="loadingDone" class="info">
+<div class="col-xs-4 navigator js-navigator" ng-show="loadingDone">
 
-        <h3> Select upto {{ maxRouteNum }} routes </h3>
+    <!-- title & logo -->
+    <div class="title">
+        <img class="logo" src="assets/muni.png" width="80">
+        <h1>Tracker</h1>
+    </div>
+
+    <!-- main -->
+    <div class="info">
+
+        <div class="upto"> Select upto {{ maxRouteNum }} routes </div>
 
         <!-- selected route info -->
         <table class="table table-condensed" ng-show="selectedRoutes.length > 0">
             <thead>
                 <tr>
-                    <th colspan="3">Route</th>
-                    <th colspan="2">Vehicles</th>
+                    <th class="route-heading" colspan="2">Route</th>
+                    <th colspan="3"># of Vehicles: Direction</th>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="(index, r) in selectedRoutes">
-                    <td style="background-color: {{ r.color }}">..</td>
-                    <td> {{ r.tag }} </td>
-                    <td> {{ r.title }} </td>
-                    <td>
-                        <div ng-repeat="(tag, val) in r.countByDir" ng-if="val.count > 0">
-                            {{ val.name }}: {{ val.count }}
-                            <span ng-click="toggleDirection(index, r.tag, tag, !val.isHidden)" class="link">
-                                <span ng-show="!val.isHidden"> hide </span>
-                                <span ng-show="val.isHidden"> show </span>
-                            </span>
+                    <td style="background-color: {{ r.color }}"></td>
+                    <td class="route">
+                        <div class="route-tag"> {{ r.tag }} </div>
+                        <div class="route-title"> {{ r.title }} </div>
+                    </td>
+                    <td ng-if="!r.na">
+                        <div ng-repeat="(tag, val) in r.directions" ng-if="val.count > 0">
+                            <span ng-class="{ off : val.isHidden }"> {{ val.count }}: {{ val.name }}</span>
+                            <a ng-click="toggleDirection(index, r.tag, tag, !val.isHidden)" class="toggle">
+                                <span ng-show="!val.isHidden"> <i class="fa fa-eye-slash"></i> </span>
+                                <span ng-show="val.isHidden"> <i class="fa fa-eye"></i> </span>
+                            </a>
                         </div>
                     </td>
-                    <td> <span class="link" ng-click="removeRoute(index, r.tag)">remove</span> </td>
+                    <td class="route-na" ng-if="r.na">N/A</td>
+                    <td class="route-more"><a ng-click="removeRoute(index, r.tag)"><i class="fa fa-times"></i></a> </td>
+                    <td class="route-more"><a ><i class="fa fa-info"></i></a> </td>
                 </tr>
             </tbody>
         </table>
 
-        <!-- when there's no selected routes -->
-        <div ng-show="selectedRoutes.length == 0">
-            No routes selected
-        </div>
+        <!-- if there's no selected routes -->
+        <div class="no-routes" ng-show="selectedRoutes.length == 0"> No routes are selected </div>
 
-        <!-- when over maximum route number -->
-        <h5 ng-if="error"> {{ errorMsg }} </h5>
+        <!-- if over maximum route number -->
+        <div class="no-routes" ng-if="error"><i class="fa fa-exclamation-circle"></i> Remove one selected route first </div>
 
         <!-- route select list -->
         <div class="btn-group" uib-dropdown is-open="status.isopen">
             <button id="single-button" type="button" class="btn btn-primary" uib-dropdown-toggle ng-disabled="disabled">
-                Select a Muni route <span class="caret"></span>
+                <i class="fa fa-bus"></i><span class="menu-title">Select a Muni route</span><span class="caret"></span>
             </button>
             <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
                 <li role="menuitem" ng-repeat="r in allRoutes">
-                    <a ng-click="selectRoute($index, r.tag)" ng-if="!r.selected">{{ r.tag }} | {{ r.title }}</a>
-                    <a ng-if="r.selected" class="selected">{{ r.tag }} | {{ r.title }}</a>
+                    <a ng-click="selectRoute($index, r.tag)" ng-if="!r.selected">{{ r.tag }} <span class="v-line"> | </span> {{ r.title }}</a>
+                    <a ng-if="r.selected" class="selected">{{ r.tag }} - {{ r.title }}</a>
                 </li>
             </ul>
         </div>
     </div>
+
+    <!-- copyright info -->
+    <div class="copyright">
+        <div>By <a href="http://tany.kim" target="_blank">Tanyoung Kim</a></div>
+        <div>View on <a href="https://github.com/tanykim/muni-tracker" target="_blank">GitHub</a></div>
+        <div>All data copyright San Francisco Muni 2016</div>
+    </div>
 </div>
 
 <!-- right map -->
-<div class="col-xs-9 js-map full-width"></div>
-<!-- <div class="map-control" ng-if="loadingDone">
-    <div class="js-map-in"><a ng-click="zoomMap(1)">Zoom In</a></div>
-    <div class="js-map-out"><a ng-click="zoomMap(-1)">Zoom Out</a></div>
-</div> -->
+<div class="col-xs-8 map js-map" ng-show="loadingDone"></div>
 
 <!-- loading -->
-<div class="loading" ng-if="!loadingDone">
-    Loading map now...
+<div class="col-xs-12 loading" ng-if="!loadingDone">
+    <div class="text"> Loading Map... </div>
 </div>

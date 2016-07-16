@@ -42,7 +42,7 @@ angular.module('trackerApp').factory('mapDrawer', [
             .attr('y', function(d){
                 return  path.centroid(d)[1];
             })
-            .attr('class', 'js-nh pos-middel size-tiny');
+            .attr('class', 'js-nh pos-middel v-central size-tiny');
     }
 
     function drawRoutes(data) {
@@ -81,17 +81,6 @@ angular.module('trackerApp').factory('mapDrawer', [
         });
     }
 
-    function getRoutesInfo(data) {
-        return _.map(data, function (route) {
-            return {
-                tag: route.tag,
-                title: route.title,
-                directions: route.directions,
-                selected: false
-            };
-        });
-    }
-
     this.loadBaseMap = function(loadingDoneCallback) {
 
         //width and height of the base map
@@ -99,6 +88,7 @@ angular.module('trackerApp').factory('mapDrawer', [
             w: d3.select('.js-map').node().getBoundingClientRect().width,
             h: $window.innerHeight
         };
+
         var svg = d3.select('.js-map')
             .append('svg')
             .attr('width', dim.w)
@@ -127,7 +117,6 @@ angular.module('trackerApp').factory('mapDrawer', [
             drawRoutes(res[2].data);
 
             //put zoom & pan rec
-            //TODO: panning limit
             svg.append('rect')
                 .attr('width', dim.w)
                 .attr('height', dim.h)
@@ -138,14 +127,12 @@ angular.module('trackerApp').factory('mapDrawer', [
                     .on('zoom', zoomed));
 
             //get objects of routes info used for HTML/main.js
-            var routesInfo = getRoutesInfo(res[2].data);
-
-            loadingDoneCallback(routesInfo);
+            loadingDoneCallback(res[2].data);
         });
     };
     /* end of base map */
 
-    //location, angle, id of each vehicle by route tag
+    //location, angle of each vehicle by route tag
     //updated after new data arrives
     var selectedRoutes = {};
 
@@ -167,97 +154,98 @@ angular.module('trackerApp').factory('mapDrawer', [
         return 'rotate(' + angle + ' ' + x + ' ' + y + ')';
     }
 
-    function setVehicleInfo(prop, x, y) {
-        var angleById = _.zip(prop.vehicleIds, prop.angles);
-        return _.object(_.map(angleById, function (d) {
-                return [d[0], { angle: d[1], x: x, y: y }];
-            }));
-    }
-
-    function drawVehicleShape(angle, x, y, dirTag, route, id) {
-
+    function drawVehicleShape(routeTag, dirTag, vId, x, y, angle, color) {
         //vehicle triangle - rotate according to the angle
         vis.append('path')
             .attr('d', getVehicleShape(x, y))
             .attr('transform', getVehicleRotation(angle, x, y))
-            .style('fill', route.color)
+            .style('fill', color)
             .style('stroke', 'black')
-            .attr('class', 'js-loc-' + route.tag + //used for add/remove of the route
-                ' js-loc-' + route.tag + '-' + id + //for transition
-                ' js-loc-' + route.tag + '-' + dirTag); //for direction toggle
+            .attr('class', 'js-loc-' + routeTag + //used for add/remove of the route
+                ' js-loc-' + routeTag + '-' + vId + //for transition
+                ' js-loc-' + routeTag + '-' + dirTag); //for direction toggle
     }
 
     function updateVehiclesLocation(data, route) {
 
         //when new data is successfully gotten
+        //4 cases of data
+
+        //add the direction of vehicle if the vehicle is updated
+        //var countByDir = [];
+
         if (!_.isNull(data)) {
 
             var oldIds = _.keys(selectedRoutes[route.tag]);
-            var newIds = data.properties.vehicleIds;
 
-            //all vehicle IDs from the new data
-            var newIdsInfo = setVehicleInfo(data.properties, null, null);
-            _.each(newIds, function (id, i) {
+            _.each(data, function (v, id) {
 
                 //stop points
-                var stops = data.geometry.coordinates[i];
-                var x = projection(stops)[0];
-                var y = projection(stops)[1];
-                var angle = +data.properties.angles[i];
+                var x = projection(v.coor)[0];
+                var y = projection(v.coor)[1];
+                var angle = v.angle;
 
                 //vehicles with the ID is drawn previously
                 if (_.contains(oldIds, id)) {
 
-                    //previous angle, x, y of the ID - used for correct transition
+                    //previous info of the ID - used for correct transition
                     var prev = selectedRoutes[route.tag][id];
 
                     //set transition only if the position changes
-                    //TODO: enhance the style of transition
-                    if (prev.x !== x || prev.y !== y) {
+                    var prevX = projection(prev.coor)[0];
+                    var prevY = projection(prev.coor)[1];
+
+                    if (prevX !== x || prevY !== y) {
+
+                        //case 1 - animate vehicle
                         d3.select('.js-loc-' + route.tag + '-' + id)
-                            .style('stroke', 'red')
+                            .style('stroke', '#c31152') //muni color
                             .transition()
                             .attrTween('d', function () {
                                 return d3.interpolateString(
-                                    getVehicleShape(prev.x, prev.y),
+                                    getVehicleShape(prevX, prevY),
                                     getVehicleShape(x, y)
                                 );
                             })
                             .attrTween('transform', function () {
                                 return d3.interpolateString(
-                                    getVehicleRotation(prev.angle, prev.x, prev.y),
+                                    getVehicleRotation(prev.angle, prevX, prevY),
                                     getVehicleRotation(angle, x, y)
                                 );
                             });
+
+                        //update counter for HTML update
+                        //countByDir.push(v.dirTag);
+
                     } else {
+                        //case 2 - turn the vehicle to the normal status
                         d3.select('.js-loc-' + route.tag + '-' + id)
                             .style('stroke', 'black');
                     }
                 } else {
-                    //draw new vehicle
-                    drawVehicleShape(angle, x, y, data.properties.dirTags[i], route, id);
+                    //case 3 - draw added vehicles
+                    drawVehicleShape(route.tag, v.dirTag, id, x, y, v.angle, route.color);
                 }
-                newIdsInfo[id].x = x;
-                newIdsInfo[id].y = y;
             });
 
-            //update vehicle ID info
-            selectedRoutes[route.tag] = newIdsInfo;
-
-            //remove vehicles that are not seen in the new data
-            _.each(_.difference(oldIds, newIds), function (id) {
+            //case 4 - remove vehicles that are not seen in the new data
+            _.each(_.difference(oldIds, _.keys(data)), function (id) {
                 d3.select('.js-loc-' + route.tag + '-' + id).remove();
             });
 
+            //update vehicle ID info
+            selectedRoutes[route.tag] = data;
         } else {
             //remove previously drawn locations and make vehicleIds empty
             d3.selectAll('.js-loc-' + route.tag).remove();
             selectedRoutes[route.tag] = {};
         }
 
+        //console.log(countByDir);
+        //return countByDir;
     }
 
-    this.drawVehiclesLocation = function (data, route) {
+    this.showVehiclesLocation = function (data, route) {
 
         //highlight route path even if there's no vehicle returned
         d3.selectAll('.js-routes-' + route.tag)
@@ -270,8 +258,6 @@ angular.module('trackerApp').factory('mapDrawer', [
             //check if the route is called first (initial call from setTimeout)
             //then update the vehicles, not draw
             if (_.contains(_.keys(selectedRoutes), route.tag)) {
-                //show the route animation of the vehicle location change
-                //console.log('---already called', route.tag);
                 updateVehiclesLocation(data, route);
                 return false;
             }
@@ -280,23 +266,16 @@ angular.module('trackerApp').factory('mapDrawer', [
             console.log('---draw initial location for', route.tag);
             d3.selectAll('.js-routes-' + route.tag).raise();
 
-            //update object of selected route
-            selectedRoutes[route.tag] = setVehicleInfo(data.properties, null, null);
-
-            _.each(data.geometry.coordinates, function (stops, i) {
-
-                //stop points
-                var x = projection(stops)[0];
-                var y = projection(stops)[1];
-                var id = data.properties.vehicleIds[i];
-                //add x, y position to the route info
-                selectedRoutes[route.tag][id].x = x;
-                selectedRoutes[route.tag][id].y = y;
-
-                //draw vehicle as triangle - top is the direction
-                drawVehicleShape(+data.properties.angles[i], x, y, data.properties.dirTags[i],
-                    route, id);
+            //draw vehicle as triangle - top is the direction
+            _.each(data, function (v, id) {
+                var x = projection(v.coor)[0];
+                var y = projection(v.coor)[1];
+                drawVehicleShape(route.tag, v.dirTag, id, x, y, v.angle, route.color);
             });
+
+            //update object of selected route
+            selectedRoutes[route.tag] = data;
+
         }
     };
 
