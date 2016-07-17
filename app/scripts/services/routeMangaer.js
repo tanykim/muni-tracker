@@ -19,15 +19,14 @@ angular.module('trackerApp').factory('routeManager', [
         });
     };
 
-    //initiate new route object when user selects a route
-    this.initNewRoute = function (id, tag, baseInfo, selectedRoutes) {
+    function getRouteColor(routes) {
 
         //colors for route, set length = MAX_ROUTE_NUMBER
         var colors = ['#4A89DC', '#F6BB42', '#F26451', '#8CC152', '#967ADC'];
-        var newColor = colors[_.size(selectedRoutes) % colors.length];
+        var newColor = colors[_.size(routes) % colors.length];
 
         //check if any routes were deleted and assing non-used color
-        var usedColors = _.pluck(selectedRoutes, 'color');
+        var usedColors = _.pluck(routes, 'color');
         if (_.contains(usedColors, newColor)) {
             for (var i = 0; i < colors.length; i++) {
                 if (!_.contains(usedColors, colors[i])) {
@@ -36,6 +35,13 @@ angular.module('trackerApp').factory('routeManager', [
                 }
             }
         }
+        return newColor;
+    }
+
+    //initiate new route object when user selects a route
+    this.initNewRoute = function (id, tag, baseInfo, routes) {
+
+        var color = getRouteColor(routes);
 
         return {
             tag: tag,
@@ -43,21 +49,23 @@ angular.module('trackerApp').factory('routeManager', [
             directions: _.object(_.sortBy(_.map(angular.copy(baseInfo.directions), function (d) {
                 return [ d.tag, {
                     name: d.name,
+                    title: d.title,
                     isHidden: false,
                     count: 0,
+                    updated: 0,
+                    stopCount: d.stops.length
                 }];
             }), function (d) {
                 return d.name;
             })),
-            color: newColor,
+            color: color,
             na: true,
-            id: id,
-            isUpdated: false
+            id: id
         };
     };
 
-    function getVehicleInfo(validVehicles) {
-        return _.object(_.map(validVehicles, function (v) {
+    function getVehicleInfo(vehicles) {
+        return _.object(_.map(vehicles, function (v) {
             return [ v._id, {
                 coor: [+v._lon, +v._lat],
                 angle: +v._heading,
@@ -66,33 +74,31 @@ angular.module('trackerApp').factory('routeManager', [
         }));
     }
 
-    function updateRouteProperties(selectedRoute, validVehicles, frequency) {
+    function updateRouteProperties(route, vehicles, ids) {
 
-        //update count by direction
-        var byDirection = _.groupBy(validVehicles, function (v) {
+        //count of all vehicles and animdated ones by direction
+        var byDirection = _.object(_.map(_.groupBy(vehicles, function (v) {
                 return v._dirTag;
-            });
-        _.each(byDirection, function (array, tag) {
-            if (selectedRoute.directions[tag]) {
-                selectedRoute.directions[tag].count = array.length;
-            }
+            }), function (vlist, dirTag) {
+                return [ dirTag, {
+                    count: vlist.length,
+                    updated: _.size(_.intersection(_.pluck(vlist, '_id'), ids))
+                }];
+            }));
+
+        _.each(byDirection, function (d, dirTag) {
+            route.directions[dirTag].count = d.count;
+            route.directions[dirTag].updated = d.updated;
         });
-        selectedRoute.na = false;
-
-        //updated status - show refresh sign for 1/3 of frequency seconds
-        selectedRoute.isUpdated = true;
-        var resetStatus = function () {
-            selectedRoute.isUpdated = false;
-        };
-        _.delay(resetStatus, frequency / 3);
+        route.na = false;
     }
 
-    function setErrorCase(selectedRoute, errorDrawer) {
-        errorDrawer(selectedRoute);
-        selectedRoute.na = true;
+    function setErrorCase(route, errorDrawer) {
+        errorDrawer(route);
+        route.na = true;
     }
 
-    this.getRouteLocation = function (selectedRoute, frequency, visDrawer, errorDrawer) {
+    this.getRouteLocation = function (route, mapDrawer) {
 
         //base URL for API
         const URL = 'http://webservices.nextbus.com/service/publicXMLFeed';
@@ -102,8 +108,7 @@ angular.module('trackerApp').factory('routeManager', [
             params: {
                 command: 'vehicleLocations',
                 a: 'sf-muni',
-                r: selectedRoute.tag,
-                //t: lastTime
+                r: route.tag
             }
         }).then(function (data) {
 
@@ -113,23 +118,31 @@ angular.module('trackerApp').factory('routeManager', [
             //vehicles that does not have "_dirTag" are ommitted assuming there are not in service
             //consider only vehicles whose direction matches from the base route info
             var validVehicles = _.filter(res.vehicle, function (v) {
-                return _.contains(_.keys(selectedRoute.directions), v._dirTag);
+                return _.contains(_.keys(route.directions), v._dirTag);
             });
             if (!_.isEmpty(validVehicles)) {
 
                 //vehicle info object for vis
                 var vehicleInfo = getVehicleInfo(validVehicles);
 
-                //draw vehicle visualization
-                visDrawer(vehicleInfo, selectedRoute);
+                //check if the route is already drawn in the vis
+                var updatedVehicles = mapDrawer.getUpdatedVehicles(vehicleInfo, route.tag);
+
+                //initiate vehicle visualization
+                if (!updatedVehicles) {
+                    mapDrawer.showVehiclesLocation(vehicleInfo, route);
+                } else {
+                    mapDrawer.updateVehiclesLocation(vehicleInfo, route);
+                }
+
                 //update route model
-                updateRouteProperties(selectedRoute, validVehicles, frequency);
+                updateRouteProperties(route, validVehicles, updatedVehicles);
 
             } else {
-                setErrorCase(selectedRoute, errorDrawer);
+                setErrorCase(route, mapDrawer.showEmptyRoute);
             }
         }, function () {
-            setErrorCase(selectedRoute, errorDrawer);
+            setErrorCase(route, mapDrawer.showEmptyRoute);
         });
     };
 

@@ -40,7 +40,7 @@ body {
 }
 /* left */
 .navigator {
-  background-color: #fff;
+  background-color: #fafafa;
   padding-top: 20px;
   padding-bottom: 20px;
   -webkit-box-shadow: 2px 0px 4px 0px rgba(0, 0, 0, 0.2);
@@ -73,6 +73,10 @@ body {
 .info .route-heading {
   padding-left: 0;
 }
+.info .route-row {
+  background-color: #fff;
+  border-width: 1px;
+}
 .info .route {
   padding-left: 10px;
 }
@@ -80,6 +84,20 @@ body {
   font-weight: 700;
 }
 .info .refreshed {
+  margin-left: 8px;
+  font-size: 0.875em;
+  color: #999999;
+  font-weight: 700;
+}
+.info .refreshed-icon {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 10px solid #c31152;
+}
+.info .refreshed-updated {
   color: #c31152;
 }
 .info .route-title {
@@ -90,7 +108,7 @@ body {
   text-decoration: line-through;
 }
 .info .toggle {
-  padding-left: 4px;
+  padding-left: 6px;
   cursor: pointer;
   color: #e5e5e5;
 }
@@ -104,6 +122,7 @@ body {
   vertical-align: middle;
   text-align: right;
   padding-left: 0;
+  padding-right: 8px;
   cursor: pointer;
 }
 .info .route-more a {
@@ -115,8 +134,19 @@ body {
 .info .more-info {
   color: #666666;
   font-size: 0.875em;
-  background-color: #fafafa;
   padding: 10px 15px;
+  border-bottom: 1px solid #e5e5e5;
+}
+.info .more-info-title {
+  font-weight: 700;
+  color: #000;
+}
+.info .more-info-dir {
+  margin-bottom: 10px;
+}
+.info .more-info-updated {
+  font-weight: 700;
+  color: #c31152;
 }
 .info .no-routes {
   font-size: 1.128em;

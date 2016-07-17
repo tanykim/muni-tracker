@@ -24,10 +24,10 @@ angular.module('trackerApp').controller('MainCtrl', [
 
         //max number of vehicles seen and frequency of update
         const MAX_ROUTE_NUMBER = 5;
-        const FREQUENCY = 3; //every 15 second
+        const FREQUENCY = 5; //every 15 second
 
         $scope.maxRouteNum = MAX_ROUTE_NUMBER;
-        $scope.frequency = FREQUENCY;
+        $scope.frequency = FREQUENCY * 1000;
 
         /****
         //Models - selected Routes, allRoutes
@@ -63,13 +63,8 @@ angular.module('trackerApp').controller('MainCtrl', [
 
             //call API every 15 seconds
             (function callAPI() {
-                routeManager.getRouteLocation(
-                    newRoute,
-                    $scope.frequency,
-                    mapDrawer.showVehiclesLocation,
-                    mapDrawer.showEmptyRoute
-                );
-                callAPIsetTimeouts[tag] = setTimeout(callAPI, 2000);
+                routeManager.getRouteLocation(newRoute, mapDrawer);
+                callAPIsetTimeouts[tag] = setTimeout(callAPI, $scope.frequency);
             })();
 
         };
@@ -93,6 +88,9 @@ angular.module('trackerApp').controller('MainCtrl', [
                     break;
                 }
             }
+            //close info
+            $scope.isInfoOpen[id] = false;
+
             //update map
             mapDrawer.removeRoute(tag);
         };
