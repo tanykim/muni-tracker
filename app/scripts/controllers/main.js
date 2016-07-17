@@ -24,7 +24,7 @@ angular.module('trackerApp').controller('MainCtrl', [
 
         //max number of vehicles seen and frequency of update
         const MAX_ROUTE_NUMBER = 5;
-        const FREQUENCY = 5; //every 15 second
+        const FREQUENCY = 15; //every 15 second
 
         $scope.maxRouteNum = MAX_ROUTE_NUMBER;
         $scope.frequency = FREQUENCY * 1000;

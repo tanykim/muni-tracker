@@ -123,7 +123,7 @@ angular.module('trackerApp').factory('mapDrawer', [
                 .style('fill', 'none')
                 .style('pointer-events', 'all')
                 .call(d3.zoom()
-                    .scaleExtent([1, 8])
+                    .scaleExtent([0.8, 8])
                     .on('zoom', zoomed));
 
             //get objects of routes info used for HTML/main.js

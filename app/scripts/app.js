@@ -15,11 +15,9 @@ angular.module('X2JS', []).factory('X2JS', ['$window', function ($window) {
     return $window.X2JS;
 }]);
 angular.module('trackerApp', [
-    'ngAnimate',
     'ngRoute',
     'ui.bootstrap',
     'underscore',
-    'angularMoment',
     'd3',
     'X2JS'
 ])

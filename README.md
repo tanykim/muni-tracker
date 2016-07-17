@@ -1,12 +1,33 @@
-# tracker
+# SF Muni Tracker
 
-This project is generated with [yo angular generator](https://github.com/yeoman/generator-angular)
-version 0.14.0.
+This web app shows the locations of SF MUNI vehicles.
 
-## Build & development
+## Setup Grunt
 
-Run `grunt` for building and `grunt serve` for preview.
+```
+npm install
+```
 
-## Testing
+## Install libraries
 
-Running `grunt test` will run the unit tests with karma.
+```
+bower install
+```
+
+## Development
+
+Run `grunt serve` for preview.
+
+## Create CSS
+
+```
+lessc less/main.less app/styles/main.css
+```
+
+## Deployment
+
+Folder "app" is ready for deployment.
+
+## Notes
+
+This project was generated with [yo angular generator](https://github.com/yeoman/generator-angular) version 0.14.0, then modfied.

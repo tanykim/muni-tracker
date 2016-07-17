@@ -1,5 +1,5 @@
 /* common setting */
-@import 'common';
+@import 'visuals';
 @import url(https://fonts.googleapis.com/css?family=Lato:400,700);
 
 html {
@@ -9,7 +9,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Lato', Helvetica, sans-serif;
-    background: @lightestGrey url('../assets/bg-pattern-sm.png');
+    background: @white url('../images/bg-pattern-sm.png');
     background-size: 142px 142px;
     height: 100%;
 }
@@ -43,12 +43,10 @@ body {
 
 /* left */
 .navigator {
-    background-color: #fafafa;
+    background-color: @lightestGrey;
     padding-top: 20px;
     padding-bottom: 20px;
-    -webkit-box-shadow: 2px 0px 4px 0px rgba(0,0,0,0.2);
-    -moz-box-shadow: 2px 0px 4px 0px rgba(0,0,0,0.2);
-    box-shadow: 2px 0px 4px 0px rgba(0,0,0,0.2);
+    border-bottom: 1px solid @lightGrey;
     .title {
         padding-bottom: 20px;
         border-bottom: 1px solid @lightGrey;
@@ -229,9 +227,7 @@ body {
 .map {
     padding-left: 0 !important;
     background-color: @white;
-    -webkit-box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
-    -moz-box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
-    box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+    border-left: 1px solid @lightGrey;
 }
 
 @import 'd3';

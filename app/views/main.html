@@ -3,7 +3,7 @@
 
     <!-- title & logo -->
     <div class="title">
-        <img class="logo" src="assets/muni.png" width="80">
+        <img class="logo" src="images/muni.png" width="80">
         <h1>Tracker</h1>
     </div>
 
@@ -17,7 +17,7 @@
             <thead>
                 <tr>
                     <th class="route-heading" colspan="2">Route</th>
-                    <th colspan="3">Direction</th>
+                    <th colspan="3">Directions</th>
                 </tr>
             </thead>
             <tbody ng-repeat="(index, r) in selectedRoutes" class="route-row">
@@ -64,7 +64,7 @@
         <div class="no-routes" ng-show="selectedRoutes.length == 0"> No routes are selected </div>
 
         <!-- if over maximum route number -->
-        <div class="no-routes" ng-if="error"><i class="fa fa-exclamation-circle"></i> Remove one selected route first </div>
+        <div class="no-routes" ng-if="error"><i class="fa fa-exclamation-circle"></i> Maximum {{ maxRouteNum }} routes can be selected. Remove one of the selected route first. </div>
 
         <!-- route select list -->
         <div class="btn-group" uib-dropdown is-open="status.isopen">
