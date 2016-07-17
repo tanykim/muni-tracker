@@ -171,112 +171,104 @@ angular.module('trackerApp').factory('mapDrawer', [
         //when new data is successfully gotten
         //4 cases of data
 
-        //add the direction of vehicle if the vehicle is updated
-        //var countByDir = [];
+        var oldIds = _.keys(selectedRoutes[route.tag]);
 
-        if (!_.isNull(data)) {
+        _.each(data, function (v, id) {
 
-            var oldIds = _.keys(selectedRoutes[route.tag]);
+            //stop points
+            var x = projection(v.coor)[0];
+            var y = projection(v.coor)[1];
+            var angle = v.angle;
 
-            _.each(data, function (v, id) {
+            //vehicles with the ID is drawn previously
+            if (_.contains(oldIds, id)) {
 
-                //stop points
-                var x = projection(v.coor)[0];
-                var y = projection(v.coor)[1];
-                var angle = v.angle;
+                //previous info of the ID - used for correct transition
+                var prev = selectedRoutes[route.tag][id];
 
-                //vehicles with the ID is drawn previously
-                if (_.contains(oldIds, id)) {
+                //set transition only if the position changes
+                var prevX = projection(prev.coor)[0];
+                var prevY = projection(prev.coor)[1];
 
-                    //previous info of the ID - used for correct transition
-                    var prev = selectedRoutes[route.tag][id];
+                if (prevX !== x || prevY !== y) {
 
-                    //set transition only if the position changes
-                    var prevX = projection(prev.coor)[0];
-                    var prevY = projection(prev.coor)[1];
+                    //case 1 - animate vehicle
+                    d3.select('.js-loc-' + route.tag + '-' + id)
+                        .style('stroke', '#c31152') //muni color
+                        .transition()
+                        .attrTween('d', function () {
+                            return d3.interpolateString(
+                                getVehicleShape(prevX, prevY),
+                                getVehicleShape(x, y)
+                            );
+                        })
+                        .attrTween('transform', function () {
+                            return d3.interpolateString(
+                                getVehicleRotation(prev.angle, prevX, prevY),
+                                getVehicleRotation(angle, x, y)
+                            );
+                        });
 
-                    if (prevX !== x || prevY !== y) {
+                    //update counter for HTML update
+                    //countByDir.push(v.dirTag);
 
-                        //case 1 - animate vehicle
-                        d3.select('.js-loc-' + route.tag + '-' + id)
-                            .style('stroke', '#c31152') //muni color
-                            .transition()
-                            .attrTween('d', function () {
-                                return d3.interpolateString(
-                                    getVehicleShape(prevX, prevY),
-                                    getVehicleShape(x, y)
-                                );
-                            })
-                            .attrTween('transform', function () {
-                                return d3.interpolateString(
-                                    getVehicleRotation(prev.angle, prevX, prevY),
-                                    getVehicleRotation(angle, x, y)
-                                );
-                            });
-
-                        //update counter for HTML update
-                        //countByDir.push(v.dirTag);
-
-                    } else {
-                        //case 2 - turn the vehicle to the normal status
-                        d3.select('.js-loc-' + route.tag + '-' + id)
-                            .style('stroke', 'black');
-                    }
                 } else {
-                    //case 3 - draw added vehicles
-                    drawVehicleShape(route.tag, v.dirTag, id, x, y, v.angle, route.color);
+                    //case 2 - turn the vehicle to the normal status
+                    d3.select('.js-loc-' + route.tag + '-' + id)
+                        .style('stroke', 'black');
                 }
-            });
+            } else {
+                //case 3 - draw added vehicles
+                drawVehicleShape(route.tag, v.dirTag, id, x, y, v.angle, route.color);
+            }
+        });
 
-            //case 4 - remove vehicles that are not seen in the new data
-            _.each(_.difference(oldIds, _.keys(data)), function (id) {
-                d3.select('.js-loc-' + route.tag + '-' + id).remove();
-            });
+        //case 4 - remove vehicles that are not seen in the new data
+        _.each(_.difference(oldIds, _.keys(data)), function (id) {
+            d3.select('.js-loc-' + route.tag + '-' + id).remove();
+        });
 
-            //update vehicle ID info
-            selectedRoutes[route.tag] = data;
-        } else {
-            //remove previously drawn locations and make vehicleIds empty
-            d3.selectAll('.js-loc-' + route.tag).remove();
-            selectedRoutes[route.tag] = {};
-        }
+        //update vehicle ID info
+        selectedRoutes[route.tag] = data;
+    }
 
-        //console.log(countByDir);
-        //return countByDir;
+    function highlightRoute(route) {
+        d3.selectAll('.js-routes-' + route.tag)
+            .style('stroke', route.color)
+            .style('opacity', 1);
     }
 
     this.showVehiclesLocation = function (data, route) {
 
-        //highlight route path even if there's no vehicle returned
-        d3.selectAll('.js-routes-' + route.tag)
-            .style('stroke', route.color)
-            .style('opacity', 1);
+        highlightRoute(route);
 
-        //draw vehicle only when data update is successful
-        if (!_.isNull(data)) {
-
-            //check if the route is called first (initial call from setTimeout)
-            //then update the vehicles, not draw
-            if (_.contains(_.keys(selectedRoutes), route.tag)) {
-                updateVehiclesLocation(data, route);
-                return false;
-            }
-
-            //called for the first time -- raise to the top
-            console.log('---draw initial location for', route.tag);
-            d3.selectAll('.js-routes-' + route.tag).raise();
-
-            //draw vehicle as triangle - top is the direction
-            _.each(data, function (v, id) {
-                var x = projection(v.coor)[0];
-                var y = projection(v.coor)[1];
-                drawVehicleShape(route.tag, v.dirTag, id, x, y, v.angle, route.color);
-            });
-
-            //update object of selected route
-            selectedRoutes[route.tag] = data;
-
+        //check if the route is called first (initial call from setTimeout)
+        //then update the vehicles, not draw
+        if (_.contains(_.keys(selectedRoutes), route.tag)) {
+            updateVehiclesLocation(data, route);
+            return false;
         }
+
+        //called for the first time -- raise to the top
+        console.log('---draw initial location for', route.tag);
+        d3.selectAll('.js-routes-' + route.tag).raise();
+
+        //draw vehicle as triangle - top is the direction
+        _.each(data, function (v, id) {
+            var x = projection(v.coor)[0];
+            var y = projection(v.coor)[1];
+            drawVehicleShape(route.tag, v.dirTag, id, x, y, v.angle, route.color);
+        });
+
+        //update object of selected route
+        selectedRoutes[route.tag] = data;
+    };
+
+    this.showEmptyRoute = function (route) {
+        //highlight route path even if there's no vehicle returned
+        highlightRoute(route);
+        d3.selectAll('.js-loc-' + route.tag).remove();
+        selectedRoutes[route.tag] = {};
     };
 
     this.removeRoute = function (tag) {

@@ -61,7 +61,11 @@ angular.module('trackerApp').controller('MainCtrl', [
 
             //call API every 15 seconds
             (function callAPI() {
-                routeManager.getRouteLocation(newRoute, mapDrawer.showVehiclesLocation);
+                routeManager.getRouteLocation(
+                    newRoute,
+                    mapDrawer.showVehiclesLocation,
+                    mapDrawer.showEmptyRoute
+                );
                 callAPIsetTimeouts[tag] = setTimeout(callAPI, 2000);
             })();
 
