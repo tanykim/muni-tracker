@@ -10,7 +10,7 @@
     <!-- main -->
     <div class="info">
 
-        <div class="upto"> Select upto {{ maxRouteNum }} routes </div>
+        <div class="upto"> Select upto {{ maxRouteNum }} routes (updated every {{ frequency }} seconds) </div>
 
         <!-- selected route info -->
         <table class="table table-condensed" ng-show="selectedRoutes.length > 0">
@@ -20,11 +20,11 @@
                     <th colspan="3"># of Vehicles: Direction</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr ng-repeat="(index, r) in selectedRoutes">
+            <tbody ng-repeat="(index, r) in selectedRoutes">
+                <tr>
                     <td style="background-color: {{ r.color }}"></td>
                     <td class="route">
-                        <div class="route-tag"> {{ r.tag }} </div>
+                        <div class="route-tag"> {{ r.tag }} <span ng-if="r.isUpdated" class="refreshed"><i class="fa fa-refresh" aria-hidden="true"></i></span> </div>
                         <div class="route-title"> {{ r.title }} </div>
                     </td>
                     <td ng-if="!r.na">
@@ -38,7 +38,14 @@
                     </td>
                     <td class="route-na" ng-if="r.na">N/A</td>
                     <td class="route-more"><a ng-click="removeRoute(index, r.tag)"><i class="fa fa-times"></i></a> </td>
-                    <td class="route-more"><a ><i class="fa fa-info"></i></a> </td>
+                    <td class="route-more"><a ng-click="showRouteInfo(index, r.tag, isInfoOpen[index])"><i class="fa fa-info"></i></a> </td>
+                </tr>
+                <tr ng-if="isInfoOpen[index]">
+                    <td colspan="5" class="more-info">
+                        <div ng-repeat="dir in allRoutes[index].directions">
+                            {{ dir.title }} ({{ dir.stops.length }} stops)
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>

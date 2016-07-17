@@ -81,6 +81,9 @@ body {
     .route-tag {
         .bold();
     }
+    .refreshed {
+        color: @muni;
+    }
     .route-title {
         font-size: @small;
         color: @grey;
@@ -110,6 +113,12 @@ body {
         a:hover {
             color: @black;
         }
+    }
+    .more-info {
+        color: @darkGrey;
+        font-size: @small;
+        background-color: @lightestGrey;
+        padding: 10px 15px;
     }
 
     /* no routes text */
@@ -172,7 +181,9 @@ body {
     }
 }
 .copyright {
-    margin-top: 40px;
+    margin-top: 60px;
+    border-top: 1px solid @lightGrey;
+    padding-top: 20px;
     color: @grey;
     font-size: @small;
     a {

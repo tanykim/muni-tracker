@@ -35,8 +35,10 @@ angular.module('trackerApp').controller('MainCtrl', [
         //2. real time status is updated from vehicle location API with routeManager.js
         //3. location of each vehicle is updated the vis in mapDrawer.js
         ****/
-        $scope.selectedRoutes = [];
+
         $scope.allRoutes = [];
+        $scope.selectedRoutes = [];
+        $scope.isInfoOpen = [];
 
         //setTimeout variables for each route
         var callAPIsetTimeouts = {};
@@ -63,6 +65,7 @@ angular.module('trackerApp').controller('MainCtrl', [
             (function callAPI() {
                 routeManager.getRouteLocation(
                     newRoute,
+                    $scope.frequency,
                     mapDrawer.showVehiclesLocation,
                     mapDrawer.showEmptyRoute
                 );
@@ -97,6 +100,10 @@ angular.module('trackerApp').controller('MainCtrl', [
         $scope.toggleDirection = function (id, routeTag, dirTag, val) {
             $scope.selectedRoutes[id].directions[dirTag].isHidden = val;
             mapDrawer.toggleDirection(routeTag, dirTag, val);
+        };
+
+        $scope.showRouteInfo = function (id, tag, status) {
+            $scope.isInfoOpen[id] = !status;
         };
 
         //when loading is done, set all routes for dropdown

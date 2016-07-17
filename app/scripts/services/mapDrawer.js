@@ -42,7 +42,7 @@ angular.module('trackerApp').factory('mapDrawer', [
             .attr('y', function(d){
                 return  path.centroid(d)[1];
             })
-            .attr('class', 'js-nh pos-middel v-central size-tiny');
+            .attr('class', 'js-nh pos-middel v-central size-tiny fill-darkGrey');
     }
 
     function drawRoutes(data) {
@@ -71,7 +71,7 @@ angular.module('trackerApp').factory('mapDrawer', [
                     .attr('cy', function (d) {
                         return projection(d.coordinates)[1];
                     })
-                    .attr('r', 1)
+                    .attr('r', 2)
                     .style('fill', '#fff')
                     .style('opacity', 0)
                     .attr('class', 'js-routes-' + route.tag + //for route show/hide
