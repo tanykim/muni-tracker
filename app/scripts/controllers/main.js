@@ -23,11 +23,8 @@ angular.module('trackerApp').controller('MainCtrl', [
         /* end of data generation */
 
         //max number of vehicles seen and frequency of update
-        const MAX_ROUTE_NUMBER = 5;
-        const FREQUENCY = 15; //every 15 second
-
-        $scope.maxRouteNum = MAX_ROUTE_NUMBER;
-        $scope.frequency = FREQUENCY * 1000;
+        $scope.maxRouteNum = 5;
+        $scope.frequency = 15 * 1000;
 
         /****
         //Models - selected Routes, allRoutes
