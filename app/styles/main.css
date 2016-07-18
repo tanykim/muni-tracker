@@ -9,7 +9,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Lato', Helvetica, sans-serif;
-  background: #fff url('../images/bg-pattern-sm.png');
+  background-color: #fff;
   background-size: 142px 142px;
   height: 100%;
 }
@@ -25,6 +25,7 @@ body {
   width: 100% !important;
 }
 .loading {
+  background: #fff url('../images/bg-pattern-sm.png');
   position: absolute;
   top: 0;
   width: 100%;
@@ -41,8 +42,9 @@ body {
 /* left */
 .navigator {
   background-color: #fafafa;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding: 20px 15px !important;
+  margin-left: -15px;
+  margin-right: -15px;
   border-bottom: 1px solid #e5e5e5;
 }
 .navigator .title {
@@ -204,9 +206,7 @@ body {
   color: #999999;
 }
 .copyright {
-  margin-top: 60px;
-  border-top: 1px solid #e5e5e5;
-  padding-top: 20px;
+  margin-top: 40px;
   color: #999999;
   font-size: 0.875em;
 }
@@ -220,8 +220,11 @@ body {
 /* map */
 .map {
   padding-left: 0 !important;
-  background-color: #fff;
+  background: #fff url('../images/bg-pattern-sm.png');
   border-left: 1px solid #e5e5e5;
+}
+.map svg {
+  /*background-color: @white;*/
 }
 /* basic d3 style setup */
 /* lables or text */

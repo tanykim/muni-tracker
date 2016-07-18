@@ -31,34 +31,39 @@ angular.module('trackerApp').factory('routeJsonGenerator', [
         });
     }
 
-    //get info of each stop from the list of stops
-    function getStopInfo(stopTag, stops) {
-        var stopInfo;
-        for (var i = 0; i < stops.length; i++) {
-            if (stops[i]._tag === stopTag) {
-                stopInfo = stops[i];
-                break;
-            }
-        }
-        return stopInfo;
-    }
-
-    //multiple directions of one route including stop info
-    function getDirectionWithStopInfo(directions, stops) {
+    function getDirectionInfo(directions) {
         return _.map(directions, function (d) {
+            // console.log(d.stop);
             return {
                 tag: d._tag,
-                name: d._name,
                 title: d._title,
-                stops: _.map(stops, function (s) {
-                    var stopInfo = getStopInfo(s._tag, stops);
-                    return {
-                        coordinates: [+stopInfo._lon, +stopInfo._lat],
-                        title: stopInfo._title
-                    };
-                })
+                name: d._name,
+                stopCount: d.stop ? d.stop.length : 0
             };
         });
+    }
+
+    //get info of each stop from the list of stops
+    function getStopsInfo(directions, stops) {
+
+        //get which directions are related to the stop
+        function getStopDirs(st) {
+            return _.map(_.filter(directions, function (d) {
+                return _.contains(_.pluck(d.stop, '_tag'), st);
+            }), function (d) {
+                return d._tag;
+            });
+        }
+
+        var stopInfo = _.map(stops, function (s) {
+            return {
+                coordinates: [+s._lon, +s._lat],
+                title: s._title,
+                stopId: s._stopId,
+                dir: getStopDirs(s._tag)
+            };
+        });
+        return stopInfo;
     }
 
     function getRoutePaths(routes) {
@@ -84,7 +89,8 @@ angular.module('trackerApp').factory('routeJsonGenerator', [
                     featureList: getPathList(routes.path),
                     tag: routes._tag,
                     title: routes._title.split('-')[1],
-                    directions: getDirectionWithStopInfo(routes.direction, routes.stop)
+                    directions: getDirectionInfo(routes.direction),
+                    stops: getStopsInfo(routes.direction, routes.stop)
                 };
             });
 

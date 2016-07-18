@@ -53,7 +53,7 @@ angular.module('trackerApp').factory('routeManager', [
                     isHidden: false,
                     count: 0,
                     updated: 0,
-                    stopCount: d.stops.length
+                    stopCount: d.stopCount
                 }];
             }), function (d) {
                 return d.name;

@@ -59,25 +59,22 @@ angular.module('trackerApp').factory('mapDrawer', [
                 .attr('class', 'js-routes-' + route.tag + //for route show/hide
                     ' js-routes-path-' + route.tag); //for d3 data binding
 
-            //draw stops by direction
-            _.each(route.directions, function (dir) {
-                vis.selectAll('.js-routes-stop-' + route.tag + '-' + dir.tag)
-                    .data(dir.stops)
-                    .enter()
-                    .append('circle')
-                    .attr('cx', function (d) {
-                        return projection(d.coordinates)[0];
-                    })
-                    .attr('cy', function (d) {
-                        return projection(d.coordinates)[1];
-                    })
-                    .attr('r', 2)
-                    .style('fill', '#fff')
-                    .style('opacity', 0)
-                    .attr('class', 'js-routes-' + route.tag + //for route show/hide
-                        //' js-loc-' + route.tag + '-' + dir.tag + //for direction toggle
-                        ' js-routes-stop-' + route.tag + '-' + dir.tag); //for d3 data binding
-            });
+            //draw stops
+            vis.selectAll('.js-routes-stop-' + route.tag)
+                .data(route.stops)
+                .enter()
+                .append('circle')
+                .attr('cx', function (d) {
+                    return projection(d.coordinates)[0];
+                })
+                .attr('cy', function (d) {
+                    return projection(d.coordinates)[1];
+                })
+                .attr('r', 2)
+                .style('fill', '#fff')
+                .style('opacity', 0)
+                .attr('class', 'js-routes-' + route.tag + //for route show/hide
+                    ' js-routes-stop-' + route.tag); //for d3 data binding
         });
     }
 
@@ -100,7 +97,6 @@ angular.module('trackerApp').factory('mapDrawer', [
             return $http.get('data/' + fileName + '.json');
         });
         $q.all(files).then(function (res) {
-
             //geo path settings
             projection = d3.geoMercator().scale(1).translate([0,0]).precision(0);
             path = d3.geoPath().projection(projection);
@@ -143,9 +139,7 @@ angular.module('trackerApp').factory('mapDrawer', [
         var width = 6;
 
         //starting point - center of the triangle
-        var sp = 'M ' + x + ' ' + (y - height / 2);
-
-        return sp +
+        return 'M ' + x + ' ' + (y - height / 2) +
             ' l ' + (width / 2) + ' ' + height + //right edge
             ' h ' + -width + ' z '; //left edge
     }
@@ -229,11 +223,10 @@ angular.module('trackerApp').factory('mapDrawer', [
 
                 //previous info of the ID - used for correct transition
                 var prev = vehicleInfo[route.tag][id];
-
-                //set transition only if the position changes
                 var prevX = projection(prev.coor)[0];
                 var prevY = projection(prev.coor)[1];
 
+                //set transition only if the position changes
                 if (prevX !== x || prevY !== y) {
 
                     //case 1 - animate vehicle
