@@ -80,6 +80,8 @@ angular.module('trackerApp').factory('mapDrawer', [
 
     this.loadBaseMap = function(loadingDoneCallback) {
 
+        console.log('--loading map data');
+
         //width and height of the base map
         dim = {
             w: d3.select('.js-map').node().getBoundingClientRect().width,
@@ -98,6 +100,9 @@ angular.module('trackerApp').factory('mapDrawer', [
         });
         $q.all(files).then(function (res) {
             //geo path settings
+
+            console.log('--drawing map');
+
             projection = d3.geoMercator().scale(1).translate([0,0]).precision(0);
             path = d3.geoPath().projection(projection);
             var bounds = path.bounds(res[0].data);
@@ -124,6 +129,9 @@ angular.module('trackerApp').factory('mapDrawer', [
 
             //get objects of routes info used for HTML/main.js
             loadingDoneCallback(res[2].data);
+        }, function () {
+            //error handling
+            loadingDoneCallback('error');
         });
     };
     /* end of base map */

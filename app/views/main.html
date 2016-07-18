@@ -1,5 +1,5 @@
 <!-- left dialogue -->
-<div class="col-xs-4" ng-show="loadingDone">
+<div class="col-xs-12 col-md-4" ng-show="loadingDone">
 
     <div class="navigator">
 
@@ -92,9 +92,9 @@
 </div>
 
 <!-- right map -->
-<div class="col-xs-8 map js-map" ng-show="loadingDone"></div>
+<div class="col-xs-12 col-md-8 map js-map" ng-show="loadingDone"></div>
 
 <!-- loading -->
 <div class="col-xs-12 loading" ng-if="!loadingDone">
-    <div class="text"> Loading map now, please wait! </div>
+    <div class="text"> {{ loadingMsg }}</div>
 </div>

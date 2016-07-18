@@ -106,10 +106,14 @@ angular.module('trackerApp').controller('MainCtrl', [
 
         //when loading is done, set all routes for dropdown
         function setLoadingDone(routesData) {
+            if (routesData === 'error') {
+                $scope.loadingMsg = 'Sorry, try again';
+            }
             $scope.allRoutes = routeManager.getRoutesBaseInfo(routesData);
             $scope.loadingDone = true;
         }
 
         //draw map - streets, neighborhoodname, and pathes of all routes
+        $scope.loadingMsg = 'Loading map now, please wait!';
         mapDrawer.loadBaseMap(setLoadingDone);
 }]);
