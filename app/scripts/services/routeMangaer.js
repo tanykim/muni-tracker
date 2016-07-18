@@ -101,7 +101,7 @@ angular.module('trackerApp').factory('routeManager', [
     this.getRouteLocation = function (route, mapDrawer) {
 
         //base URL for API
-        const URL = 'http://webservices.nextbus.com/service/publicXMLFeed';
+        var URL = 'http://webservices.nextbus.com/service/publicXMLFeed';
         var x2js = new X2JS();
 
         $http.get(URL, {

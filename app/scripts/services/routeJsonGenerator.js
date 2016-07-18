@@ -11,7 +11,7 @@ angular.module('trackerApp').factory('routeJsonGenerator', [
     //used only once to generate static datasets as a json file
 
     //base URL for API
-    const URL = 'http://webservices.nextbus.com/service/publicXMLFeed';
+    var URL = 'http://webservices.nextbus.com/service/publicXMLFeed';
 
     // jscs:disable
     var x2js = new X2JS();

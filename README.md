@@ -49,3 +49,6 @@ This project was generated with [yo angular generator](https://github.com/yeoman
 ## TO-DOs
 
 * User interaction on the map - over stops and vehicles
+* Reduce route.json size
+* Separate routeJsonGenerator
+* Bootstrap touch interaction
